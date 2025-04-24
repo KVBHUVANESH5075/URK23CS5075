@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Grocery List and Expiry Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .header {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .item input[type="text"], .item input[type="date"] {
+            width: 45%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .item button {
+            margin-left: 5px;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .item button:hover {
+            background-color: #45a049;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+        .list-item span {
+            font-weight: bold;
+        }
+        .list-item button {
+            padding: 5px 10px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .list-item button:hover {
+            background-color: #cc3333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Smart Grocery List and Expiry Tracker</h1>
+        <div class="header">Add New Item</div>
+        <div class="item">
+            <input type="text" id="item-name" placeholder="Item Name">
+            <input type="date" id="item-expiry">
+            <button onclick="addItem()">Add Item</button>
+        </div>
+        <div class="header">Grocery List</div>
+        <div id="grocery-list"></div>
+    </div>
+
+    <script>
+        async function addItem() {
+            const itemName = document.getElementById('item-name').value;
+            const itemExpiry = document.getElementById('item-expiry').value;
+
+            if (itemName && itemExpiry) {
+                await fetch('/api/grocery/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: itemName, expiry: itemExpiry })
+                });
+                updateList();
+                document.getElementById('item-name').value = '';
+                document.getElementById('item-expiry').value = '';
+            }
+        }
+
+        async function updateList() {
+            const response = await fetch('/api/grocery/list');
+            const groceryList = await response.json();
+            const listContainer = document.getElementById('grocery-list');
+            listContainer.innerHTML = '';
+
+            groceryList.forEach((item, index) => {
+                const listItem = document.createElement('div');
+                listItem.classList.add('list-item');
+                listItem.innerHTML = `
+                    <span>${item.name}</span>
+                    <span>${item.expiry}</span>
+                    <button onclick="removeItem(${index})">Remove</button>
+                `;
+                listContainer.appendChild(listItem);
+            });
+        }
+
+        async function removeItem(index) {
+            await fetch(`/api/grocery/remove/${index}`, {
+                method: 'DELETE'
+            });
+            updateList();
+        }
+
+        // Initial load of the grocery list
+        updateList();
+    </script>
+</body>
+</html>

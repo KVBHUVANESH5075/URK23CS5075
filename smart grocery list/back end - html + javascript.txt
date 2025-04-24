@@ -1,0 +1,121 @@
+back end - html + javascript:-
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class GroceryListManager {
+    private List<GroceryItem> groceryList;
+
+    public GroceryListManager() {
+        this.groceryList = new ArrayList<>();
+    }
+
+    public void addItem(String name, LocalDate expiry) {
+        groceryList.add(new GroceryItem(name, expiry));
+    }
+
+    public void removeItem(int index) {
+        if (index >= 0 && index < groceryList.size()) {
+            groceryList.remove(index);
+        }
+    }
+
+    public List<GroceryItem> getGroceryList() {
+        return groceryList;
+    }
+
+    public static class GroceryItem {
+        private String name;
+        private LocalDate expiry;
+
+        public GroceryItem(String name, LocalDate expiry) {
+            this.name = name;
+            this.expiry = expiry;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public LocalDate getExpiry() {
+            return expiry;
+        }
+    }
+}
+
+
+
+grocery controller.java :-
+
+
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/grocery")
+public class GroceryController {
+    private final GroceryListManager groceryListManager;
+
+    public GroceryController(GroceryListManager groceryListManager) {
+        this.groceryListManager = groceryListManager;
+    }
+
+    @PostMapping("/add")
+    public void addItem(@RequestBody GroceryItem item) {
+        groceryListManager.addItem(item.getName(), item.getExpiry());
+    }
+
+    @DeleteMapping("/remove/{index}")
+    public void removeItem(@PathVariable int index) {
+        groceryListManager.removeItem(index);
+    }
+
+    @GetMapping("/list")
+    public List<GroceryItem> getGroceryList() {
+        return groceryListManager.getGroceryList();
+    }
+}
+
+
+
+
+
+
+GroceryItem.java (DTO for JSON communication) :-
+
+
+import java.time.LocalDate;
+
+public class GroceryItem {
+    private String name;
+    private LocalDate expiry;
+
+    public GroceryItem() {}
+
+    public GroceryItem(String name, LocalDate expiry) {
+        this.name = name;
+        this.expiry = expiry;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getExpiry() {
+        return expiry;
+    }
+
+    public void setExpiry(LocalDate expiry) {
+        this.expiry = expiry;
+    }
+}
+
+
+
+
